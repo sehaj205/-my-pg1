@@ -18,6 +18,10 @@
     {
       "src": "/admin",
       "dest": "apps/merchant-admin/src/index.html"
+    },
+    {
+      "src": "/",
+      "dest": "apps/checkout-portal/src/index.html"
     }
   ],
   "env": {
