@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pay with MyPG - Razorpay Style</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .checkout-modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .modal-header {
+      background: linear-gradient(135deg, #0d6efd 0%, #0052cc 100%);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: white;
+    }
+
+    .merchant-avatar {
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0d6efd;
+    }
+
+    .merchant-info h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .verified-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      opacity: 0.95;
+    }
+
+    .verified-badge svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .user-icon {
+      margin-left: auto;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Offers Section */
+    .offers-section {
+      padding: 16px 24px;
+      background: #f8f9fa;
+    }
+
+    .offers-title {
+      font-size: 13px;
+      color: #6c757d;
+      margin-bottom: 12px;
+    }
+
+    .offer-card {
+      background: #e7f3ff;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #0052cc;
+      font-weight: 500;
+    }
+
+    .offer-icon {
+      width: 32px;
+      height: 32px;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Payment Options */
+    .payment-section {
+      padding: 20px 24px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 16px;
+    }
+
+    .payment-option {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .payment-option:hover {
+      border-color: #0d6efd;
+    }
+
+    .payment-option-header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      background: white;
+      transition: background 0.2s;
+    }
+
+    .payment-option-header:hover {
+      background: #f8f9fa;
+    }
+
+    .payment-option.expanded .payment-option-header {
+      background: #f8f9fa;
+    }
+
+    .payment-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .payment-option-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #212529;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .payment-logos {
+      display: flex;
+      gap: 6px;
+    }
+
+    .payment-logos img {
+      height: 20px;
+    }
+
+    .expand-icon {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s;
+    }
+
+    .payment-option.expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+
+    .payment-option-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .payment-option.expanded .payment-option-body {
+      max-height: 600px;
+    }
+
+    /* UPI Apps Grid */
+    .upi-apps-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .upi-app-btn {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .upi-app-btn:hover {
+      border-color: #0d6efd;
+      background: #f8f9fa;
+    }
+
+    .upi-app-btn.selected {
+      border-color: #0d6efd;
+      background: #e7f3ff;
+    }
+
+    .upi-app-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .offer-tag {
+      background: #d4edda;
+      color: #155724;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    /* Cards/Netbanking/Wallets */
+    .option-list {
+      padding: 16px;
+    }
+
+    .option-item {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-item:hover {
+      border-color: #0d6efd;
+      background: #f8f9fa;
+    }
+
+    .option-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    /* Footer */
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 1px solid #dee2e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .amount-display {
+      font-size: 20px;
+      font-weight: 700;
+      color: #212529;
+    }
+
+    .amount-label {
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 4px;
+    }
+
+    .pay-btn {
+      background: #0d6efd;
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pay-btn:hover {
+      background: #0052cc;
+      transform: translateY(-1px);
+    }
+
+    .pay-btn:active {
+      transform: translateY(0);
+    }
+
+    .powered-by {
+      text-align: center;
+      padding: 12px;
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .powered-by a {
+      color: #0d6efd;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* QR Modal */
+    .qr-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .qr-overlay.active {
+      display: flex;
+    }
+
+    .qr-modal {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 400px;
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .qr-code-container {
+      width: 200px;
+      height: 200px;
+      margin: 24px auto;
+      background: #f8f9fa;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff3cd;
+      color: #856404;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      margin: 16px 0;
+    }
+
+    .close-btn {
+      width: 100%;
+      padding: 12px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 16px;
+    }
+
+    .close-btn:hover {
+      background: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-modal">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="merchant-avatar">A</div>
+      <div class="merchant-info">
+        <h2>Acme Corp</h2>
+        <div class="verified-badge">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+          </svg>
+          MyPG Trusted Business
+        </div>
+      </div>
+      <div class="user-icon">
+        <svg fill="white" viewBox="0 0 20 20" width="24" height="24">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Offers -->
+    <div class="offers-section">
+      <div class="offers-title">Available Offers</div>
+      <div class="offer-card">
+        <div class="offer-icon">🎁</div>
+        <span>UPTO ₹200 CRED cashback on CRED</span>
+      </div>
+    </div>
+
+    <!-- Payment Options -->
+    <div class="payment-section">
+      <div class="section-title">All Payment Options</div>
+
+      <!-- UPI -->
+      <div class="payment-option expanded" id="upi-option">
+        <div class="payment-option-header" onclick="toggleOption('upi-option')">
+          <div class="payment-icon">⚡</div>
+          <div class="payment-option-title">
+            UPI
+            <div class="payment-logos">
+              <span style="font-size: 20px;">🟡</span>
+              <span style="font-size: 20px;">🟣</span>
+              <span style="font-size: 20px;">🔵</span>
+            </div>
+          </div>
+          <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="payment-option-body">
+          <div class="upi-apps-grid">
+            <div class="upi-app-btn selected" data-app="gpay">
+              <div class="upi-app-icon">
+                <svg viewBox="0 0 48 48" width="40" height="40">
+                  <circle cx="24" cy="24" r="22" fill="#5F6368"/>
+                  <path d="M24 14a10 10 0 100 20 10 10 0 000-20z" fill="white"/>
+                  <path d="M24 16a8 8 0 100 16 8 8 0 000-16z" fill="#4285F4"/>
+                </svg>
+              </div>
+              <span>Google Pay</span>
+            </div>
+            <div class="upi-app-btn" data-app="phonepe">
+              <div class="upi-app-icon">
+                <svg viewBox="0 0 48 48" width="40" height="40">
+                  <circle cx="24" cy="24" r="22" fill="#5F259F"/>
+                  <path d="M24 12l8 8-8 8-8-8z" fill="white"/>
+                </svg>
+              </div>
+              <span>PhonePe</span>
+            </div>
+            <div class="upi-app-btn" data-app="paytm">
+              <div class="upi-app-icon">
+                <svg viewBox="0 0 48 48" width="40" height="40">
+                  <circle cx="24" cy="24" r="22" fill="#00BAF2"/>
+                  <path d="M20 18h8v12h-8z" fill="white"/>
+                </svg>
+              </div>
+              <span>PayTM</span>
+            </div>
+            <div class="upi-app-btn" data-app="cred">
+              <div class="upi-app-icon">
+                <svg viewBox="0 0 48 48" width="40" height="40">
+                  <rect width="48" height="48" rx="10" fill="#0F0F0F"/>
+                  <text x="24" y="32" text-anchor="middle" fill="white" font-size="18" font-weight="700">₹</text>
+                </svg>
+              </div>
+              <span>CRED UPI</span>
+              <span class="offer-tag">Upto ₹200</span>
+            </div>
+            <div class="upi-app-btn" data-app="other">
+              <div class="upi-app-icon">⋯</div>
+              <span>Apps & UPI ID</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards -->
+      <div class="payment-option" id="cards-option">
+        <div class="payment-option-header" onclick="toggleOption('cards-option')">
+          <div class="payment-icon">💳</div>
+          <div class="payment-option-title">
+            Cards
+            <div class="payment-logos">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='24'%3E%3Crect fill='%231434CB' width='40' height='24' rx='2'/%3E%3Ctext x='20' y='16' text-anchor='middle' fill='white' font-size='10' font-weight='bold'%3EVISA%3C/text%3E%3C/svg%3E" alt="VISA">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='24'%3E%3Ccircle cx='14' cy='12' r='10' fill='%23EB001B'/%3E%3Ccircle cx='26' cy='12' r='10' fill='%23F79E1B'/%3E%3C/svg%3E" alt="Mastercard">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='24'%3E%3Crect fill='%23016FD0' width='40' height='24' rx='2'/%3E%3Ctext x='20' y='16' text-anchor='middle' fill='white' font-size='8' font-weight='bold'%3ERuPay%3C/text%3E%3C/svg%3E" alt="RuPay">
+            </div>
+          </div>
+          <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="payment-option-body">
+          <div class="option-list">
+            <div class="option-item">
+              <div class="option-icon">💳</div>
+              <div class="option-text">Credit Card</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">💳</div>
+              <div class="option-text">Debit Card</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Netbanking -->
+      <div class="payment-option" id="netbanking-option">
+        <div class="payment-option-header" onclick="toggleOption('netbanking-option')">
+          <div class="payment-icon">🏦</div>
+          <div class="payment-option-title">
+            Netbanking
+            <div class="payment-logos" style="font-size: 18px;">
+              <span>🔵</span>
+              <span>🔴</span>
+              <span>🟢</span>
+            </div>
+          </div>
+          <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="payment-option-body">
+          <div class="option-list">
+            <div class="option-item">
+              <div class="option-icon">🏦</div>
+              <div class="option-text">HDFC Bank</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">🏦</div>
+              <div class="option-text">ICICI Bank</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">🏦</div>
+              <div class="option-text">Axis Bank</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">🏦</div>
+              <div class="option-text">State Bank of India</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wallets -->
+      <div class="payment-option" id="wallet-option">
+        <div class="payment-option-header" onclick="toggleOption('wallet-option')">
+          <div class="payment-icon">👛</div>
+          <div class="payment-option-title">
+            Wallet
+            <div class="payment-logos" style="font-size: 18px;">
+              <span>🟣</span>
+              <span>🔵</span>
+              <span>🟠</span>
+            </div>
+          </div>
+          <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="payment-option-body">
+          <div class="option-list">
+            <div class="option-item">
+              <div class="option-icon">🟣</div>
+              <div class="option-text">PhonePe Wallet</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">🔵</div>
+              <div class="option-text">Paytm Wallet</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+            <div class="option-item">
+              <div class="option-icon">🟠</div>
+              <div class="option-text">Amazon Pay</div>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <div>
+        <div class="amount-label">₹10</div>
+        <a href="#" style="color: #0d6efd; text-decoration: none; font-size: 13px;">View Details ↓</a>
+      </div>
+      <button class="pay-btn" onclick="initiatePayment()">Continue</button>
+    </div>
+
+    <div class="powered-by">
+      Secured by <a href="#">MyPG</a> • 0% Commission
+    </div>
+  </div>
+
+  <!-- QR Modal -->
+  <div class="qr-overlay" id="qr-modal">
+    <div class="qr-modal">
+      <h3 style="font-size: 20px; margin-bottom: 8px;">Scan & Pay</h3>
+      <p style="color: #6c757d; font-size: 14px;">Order: <span id="order-id-display">ORD-123456</span></p>
+
+      <div class="qr-code-container">
+        <svg viewBox="0 0 200 200" width="180" height="180">
+          <rect width="200" height="200" fill="white"/>
+          <path d="M20,20 h40 v40 h-40 z M70,20 h10 v10 h-10 z M90,20 h10 v10 h-10 z M110,20 h10 v10 h-10 z M130,20 h10 v10 h-10 z M150,20 h30 v30 h-30 z" fill="black"/>
+          <path d="M30,30 h20 v20 h-20 z M160,30 h10 v10 h-10 z M20,70 h10 v10 h-10 z M150,70 h10 v10 h-10 z M170,70 h10 v10 h-10 z" fill="black"/>
+          <path d="M50,50 h10 v10 h-10 z M90,50 h20 v20 h-20 z M130,50 h10 v10 h-10 z M160,50 h10 v10 h-10 z" fill="black"/>
+          <path d="M20,90 h10 v10 h-10 z M50,90 h10 v10 h-10 z M70,90 h30 v30 h-30 z M110,90 h10 v10 h-10 z M130,90 h20 v20 h-20 z M170,90 h10 v10 h-10 z" fill="black"/>
+          <path d="M40,110 h10 v10 h-10 z M80,100 h10 v10 h-10 z M160,110 h10 v10 h-10 z" fill="black"/>
+          <path d="M20,130 h10 v10 h-10 z M50,130 h10 v10 h-10 z M70,130 h10 v10 h-10 z M110,130 h20 v20 h-20 z M150,130 h10 v10 h-10 z M170,130 h10 v10 h-10 z" fill="black"/>
+          <path d="M20,150 h40 v40 h-40 z M80,150 h10 v10 h-10 z M100,150 h10 v10 h-10 z M140,150 h10 v10 h-10 z M150,160 h30 v30 h-30 z" fill="black"/>
+          <path d="M30,160 h20 v20 h-20 z M80,170 h10 v10 h-10 z M110,170 h20 v20 h-20 z M160,170 h10 v10 h-10 z" fill="black"/>
+        </svg>
+      </div>
+
+      <div class="timer-badge">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span id="countdown">5:00</span> remaining
+      </div>
+
+      <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin: 16px 0; font-size: 14px;">
+        <strong>UPI ID:</strong> yourname@upi
+      </div>
+
+      <button class="close-btn" onclick="closeQRModal()">Cancel Payment</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedApp = 'gpay';
+
+    // Toggle payment option
+    function toggleOption(id) {
+      const option = document.getElementById(id);
+      const allOptions = document.querySelectorAll('.payment-option');
+
+      allOptions.forEach(opt => {
+        if (opt.id !== id) {
+          opt.classList.remove('expanded');
+        }
+      });
+
+      option.classList.toggle('expanded');
+    }
+
+    // Select UPI app
+    document.querySelectorAll('.upi-app-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedApp = this.dataset.app;
+      });
+    });
+
+    // Initiate payment
+    async function initiatePayment() {
+      const orderId = 'ORD-' + Date.now().toString().slice(-8);
+      document.getElementById('order-id-display').textContent = orderId;
+
+      document.getElementById('qr-modal').classList.add('active');
+
+      // Start countdown
+      let timeLeft = 300;
+      const timer = setInterval(() => {
+        timeLeft--;
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('countdown').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      // Poll for payment status
+      const statusInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`http://localhost:6100/api/v1/payments/${orderId}/status`);
+          const data = await response.json();
+
+          if (data.status === 'SUCCESS') {
+            clearInterval(statusInterval);
+            clearInterval(timer);
+            showSuccess();
+          }
+        } catch (e) {
+          console.log('Waiting for payment...');
+        }
+      }, 3000);
+    }
+
+    function showSuccess() {
+      document.querySelector('.qr-modal').innerHTML = `
+        <div style="width: 64px; height: 64px; background: #d4edda; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <svg width="32" height="32" fill="#28a745" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 22px; margin-bottom: 8px; color: #28a745;">Payment Successful!</h3>
+        <p style="font-size: 24px; font-weight: 700; margin: 16px 0;">₹10.00</p>
+        <p style="color: #6c757d;">Your payment has been processed successfully</p>
+        <button class="pay-btn" style="width: 100%; margin-top: 24px;" onclick="closeQRModal()">Done</button>
+      `;
+    }
+
+    function closeQRModal() {
+      document.getElementById('qr-modal').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

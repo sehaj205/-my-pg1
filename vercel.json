@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/payment-api/src/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "apps/payment-api/src/index.js"
+    },
+    {
+      "src": "/checkout",
+      "dest": "apps/checkout-portal/src/index.html"
+    },
+    {
+      "src": "/admin",
+      "dest": "apps/merchant-admin/src/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
